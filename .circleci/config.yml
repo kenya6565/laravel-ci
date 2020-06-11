@@ -8,8 +8,22 @@ jobs:
       #CircleCIの環境にはGitHubからソースコードをコピーしてきただけなので、LaravelのフレームワークのコードなどPHP関連パッケージが存在しません。
       #CircleCIで実施するテストでは、あなたのPCのローカル環境で実施するテストとは違って、このように必要なパッケージを毎回インストールしなければならない
       - checkout
+      #restore_cacheでは、保存されたキャッシュを復元します。
+      #keyには、復元するキャッシュの名前を指定します。
+      - restore_cache:
+        key: composer-v1-{{ checksum "composer.lock" }}
       #Composerを使用してPHP関連パッケージをインストールします
       - run: composer install -n --prefer-dist
+
+      - save_cache:
+        #save_cacheでは、keyに指定した名前でキャッシュを保存します。
+        #{{ checksum "composer.lock" }}という部分は、CircleCIのテンプレート機能を使用しています。
+        #{{ checksum "ファイル名" }}とすることで、ファイルをハッシュ化した値を算出しています。
+        #composer.lockでは、Composerによってインストールされた各パッケージのバージョンが、依存パッケージも含め管理されています。
+        key: composer-v1-{{ checksum "composer.lock" }}
+        #composerをvenderの中にインスとるしそのvendorディレクトリをキャッシュとして保存します。
+        paths:
+          - vendor
       #PCの開発環境を構築した時と同様に、npmを使用してJavaScript関連パッケージをインストール
       - run: npm ci
       #PCの開発環境を構築した時と同様に、JavaScriptのトランスパイルを行なっています。
