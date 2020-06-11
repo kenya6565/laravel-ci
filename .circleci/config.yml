@@ -3,6 +3,20 @@ jobs:
   build:
     docker:
       - image: circleci/php:7.3-node-browsers
+      - image: circleci/postgres:11.6-alpine
+        environment:
+          POSTGRES_DB: larasns
+          POSTGRES_USER: default
+          POSTGRES_PASSWORD: secret
+    #ここで記述するenvironmentは、PostgreSQLのコンテナに対する環境変数
+    environment:
+      APP_ENV: testing
+      DB_CONNECTION: pgsql
+      DB_HOST: localhost
+      DB_PORT: 5432
+      DB_DATABASE: larasns
+      DB_USERNAME: default
+      DB_PASSWORD: secret
     steps:
       #checkoutは、GitHubからCircleCIの環境にソースコードをコピー(git clone)してきます。
       #CircleCIの環境にはGitHubからソースコードをコピーしてきただけなので、LaravelのフレームワークのコードなどPHP関連パッケージが存在しません。
@@ -42,6 +56,14 @@ jobs:
 
       #PCの開発環境を構築した時と同様に、JavaScriptのトランスパイルを行なっています。
       - run: npm run dev
+      #、LaravelがPostgreSQLに接続するのに必要なソフトウェアのインストールなどを行なっています。
+      - run:
+        name: get ready for postgres
+        command: |
+          sudo apt-get update
+          sudo apt-get install libpq-dev
+          sudo docker-php-ext-install pdo_pgsql
+          dockerize -wait tcp://localhost:5432 -timeout 1m
 
       - run:
         #nameは、CircleCIの画面に表示されるステップ名となります。省略すると、commandの内容がそのままステップ名として表示されます。
