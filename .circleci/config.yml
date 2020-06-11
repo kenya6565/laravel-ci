@@ -56,7 +56,7 @@ jobs:
 
       #PCの開発環境を構築した時と同様に、JavaScriptのトランスパイルを行なっています。
       - run: npm run dev
-      #、LaravelがPostgreSQLに接続するのに必要なソフトウェアのインストールなどを行なっています。
+      #LaravelがPostgreSQLに接続するのに必要なソフトウェアのインストールなどを行なっています。
       - run:
         name: get ready for postgres
         command: |
