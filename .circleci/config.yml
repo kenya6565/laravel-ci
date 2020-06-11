@@ -8,7 +8,6 @@ jobs:
           POSTGRES_DB: larasns
           POSTGRES_USER: default
           POSTGRES_PASSWORD: secret
-    #ここで記述するenvironmentは、PostgreSQLのコンテナに対する環境変数
     environment:
       APP_ENV: testing
       DB_CONNECTION: pgsql
@@ -18,56 +17,34 @@ jobs:
       DB_USERNAME: default
       DB_PASSWORD: secret
     steps:
-      #checkoutは、GitHubからCircleCIの環境にソースコードをコピー(git clone)してきます。
-      #CircleCIの環境にはGitHubからソースコードをコピーしてきただけなので、LaravelのフレームワークのコードなどPHP関連パッケージが存在しません。
-      #CircleCIで実施するテストでは、あなたのPCのローカル環境で実施するテストとは違って、このように必要なパッケージを毎回インストールしなければならない
       - checkout
-
-      #restore_cacheでは、保存されたキャッシュを復元します。
-      #keyには、復元するキャッシュの名前を指定します。
       - restore_cache:
           key: composer-v1-{{ checksum "composer.lock" }}
-      #Composerを使用してPHP関連パッケージをインストールします
       - run: composer install -n --prefer-dist
-
       - save_cache:
-        #save_cacheでは、keyに指定した名前でキャッシュを保存します。
-        #{{ checksum "composer.lock" }}という部分は、CircleCIのテンプレート機能を使用しています。
-        #{{ checksum "ファイル名" }}とすることで、ファイルをハッシュ化した値を算出しています。
-        #composer.lockでは、Composerによってインストールされた各パッケージのバージョンが、依存パッケージも含め管理されています。
           key: composer-v1-{{ checksum "composer.lock" }}
-        #composerをvenderの中にインスとるしそのvendorディレクトリをキャッシュとして保存します。
           paths:
             - vendor
       - restore_cache:
           key: npm-v1-{{ checksum "package-lock.json" }}
-
       - run:
           name: npm ci
-          #node_modulesというディレクトリが存在しなければnpm ciを行うよ
           command: |
-              if [ ! -d node_modules ]; then
-                npm ci
-              fi 
+            if [ ! -d node_modules ]; then
+              npm ci
+            fi
       - save_cache:
           key: npm-v1-{{ checksum "package-lock.json" }}
           paths:
             - node_modules
-
-      #PCの開発環境を構築した時と同様に、JavaScriptのトランスパイルを行なっています。
       - run: npm run dev
-      #LaravelがPostgreSQLに接続するのに必要なソフトウェアのインストールなどを行なっています。
       - run:
-        name: get ready for postgres
-        command: |
-          sudo apt-get update
-          sudo apt-get install libpq-dev
-          sudo docker-php-ext-install pdo_pgsql
-          dockerize -wait tcp://localhost:5432 -timeout 1m
-
+          name: get ready for postgres
+          command: |
+            sudo apt-get update
+            sudo apt-get install libpq-dev
+            sudo docker-php-ext-install pdo_pgsql
+            dockerize -wait tcp://localhost:5432 -timeout 1m
       - run:
-        #nameは、CircleCIの画面に表示されるステップ名となります。省略すると、commandの内容がそのままステップ名として表示されます。
-        #テストを実行
           name: php test
-        #commandには、実行するシェルのコマンドを定義します。
           command: vendor/bin/phpunit
