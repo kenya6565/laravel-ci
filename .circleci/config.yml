@@ -4,10 +4,10 @@ jobs:
     docker:
       - image: circleci/php:7.3-node-browsers
       - image: circleci/postgres:11.6-alpine
-        environment:
-          POSTGRES_DB: larasns
-          POSTGRES_USER: default
-          POSTGRES_PASSWORD: secret
+      environment:
+        POSTGRES_DB: larasns
+        POSTGRES_USER: default
+        POSTGRES_PASSWORD: secret
     #ここで記述するenvironmentは、PostgreSQLのコンテナに対する環境変数
     environment:
       APP_ENV: testing
