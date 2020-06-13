@@ -89,7 +89,6 @@ jobs:
             --application-name laravel-ci \
             --deployment-group-name laravel-ci \
             --s3-location bucket=${AWS_S3_BUCKET_NAME},key=laravel-ci.zip,bundleType=zip
-
 orbs:
   aws-cli: circleci/aws-cli@1.0.0
 workflows:
