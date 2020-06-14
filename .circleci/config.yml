@@ -104,7 +104,7 @@ orbs:
   aws-cli: circleci/aws-cli@1.0.0
 workflows:
   version: 2
-build_deploy:
+  build_deploy:
     jobs:
       - build
       - deploy:
@@ -115,9 +115,9 @@ build_deploy:
               only:
                 - master
       - deploy_tmp:
-        requires:
-          - build
-        filters:
-          branches:
-            only:
+          requires:
+            - build
+          filters:
+            branches:
+              only:
               - master
